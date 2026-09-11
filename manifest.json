@@ -1,0 +1,22 @@
+{
+  "name": "GrowLog",
+  "short_name": "GrowLog",
+  "description": "Persönliches Grow-Tagebuch für Pflanzen, Klima und Dokumentation",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f4",
+  "theme_color": "#18392b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
