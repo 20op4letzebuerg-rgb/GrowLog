@@ -1,4 +1,4 @@
-const CACHE_NAME = "growlog-v2";
+const CACHE_NAME = "growlog-v3";
 
 const APP_FILES = [
   "./",
