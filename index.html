@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#18392b">
+
+  <title>GrowLog</title>
+
+  <style>
+    :root {
+      --bg: #f4f7f4;
+      --card: #ffffff;
+      --green: #18392b;
+      --green2: #2f6b4f;
+      --lightgreen: #dfece4;
+      --text: #1f2923;
+      --muted: #6d776f;
+      --border: #dfe5e0;
+      --danger: #a83d3d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 90px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--green), var(--green2));
+      color: white;
+      padding: 28px 20px 24px;
+      border-radius: 0 0 26px 26px;
+    }
+
+    header h1 {
+      margin: 0 0 5px;
+      font-size: 30px;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.85;
+    }
+
+    main {
+      max-width: 800px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.04);
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      text-align: center;
+    }
+
+    .metric .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--green);
+      margin-top: 6px;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-top: 4px;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      width: 100%;
+      font: inherit;
+      border-radius: 12px;
+    }
+
+    input,
+    select,
+    textarea {
+      border: 1px solid var(--border);
+      padding: 12px;
+      background: white;
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    button {
+      border: 0;
+      padding: 13px;
+      font-weight: 600;
+      background: var(--green);
+      color: white;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: var(--lightgreen);
+      color: var(--green);
+    }
+
+    button.danger {
+      background: #f8dddd;
+      color: var(--danger);
+    }
+
+    .plant {
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .plant:last-child {
+      border-bottom: 0;
+    }
+
+    .plant strong {
+      display: block;
+      font-size: 17px;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .journal-entry {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .journal-entry:last-child {
+      border-bottom: 0;
+    }
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.96);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+      backdrop-filter: blur(15px);
+    }
+
+    nav button {
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 3px;
+      font-size: 12px;
+    }
+
+    nav button.active {
+      color: var(--green);
+    }
+
+    section {
+      display: none;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    .status {
+      display: inline-block;
+      background: var(--lightgreen);
+      color: var(--green);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    @media (min-width: 700px) {
+      .grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🌱 GrowLog</h1>
+  <p>Dein persönliches Grow-Tagebuch</p>
+</header>
+
+<main>
+
+  <section id="dashboard" class="active">
+
+    <div class="card">
+      <span class="status">Govee Vorbereitung</span>
+      <h2>Grow Room</h2>
+
+      <div class="grid">
+        <div class="metric">
+          <div class="label">Temperatur</div>
+          <div class="value" id="temperature">-- °C</div>
+        </div>
+
+        <div class="metric">
+          <div class="label">Luftfeuchtigkeit</div>
+          <div class="value" id="humidity">-- %</div>
+        </div>
+
+        <div class="metric">
+          <div class="label">VPD</div>
+          <div class="value" id="vpd">-- kPa</div>
+        </div>
+
+        <div class="metric">
+          <div class="label">Pflanzen</div>
+          <div class="value" id="plantCount">0</div>
+        </div>
+      </div>
+
+      <p class="small">
+        Die Govee-Livewerte werden im nächsten Schritt mit deinem geschützten API-Endpunkt verbunden.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Letzter Tagebucheintrag</h2>
+      <div id="lastJournal" class="empty">
+        Noch kein Eintrag vorhanden.
+      </div>
+    </div>
+
+  </section>
+
+
+  <section id="plants">
+
+    <div class="card">
+      <h2>Pflanze hinzufügen</h2>
+
+      <input
+        id="plantName"
+        type="text"
+        placeholder="Name der Pflanze">
+
+      <input
+        id="plantStrain"
+        type="text"
+        placeholder="Sorte">
+
+      <select id="plantPhase">
+        <option value="Keimling">Keimling</option>
+        <option value="Wachstum">Wachstum</option>
+        <option value="Blüte">Blüte</option>
+        <option value="Trocknung">Trocknung</option>
+        <option value="Archiviert">Archiviert</option>
+      </select>
+
+      <input
+        id="plantStart"
+        type="date">
+
+      <button onclick="addPlant()">
+        Pflanze speichern
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>Meine Pflanzen</h2>
+      <div id="plantList"></div>
+    </div>
+
+  </section>
+
+
+  <section id="journal">
+
+    <div class="card">
+      <h2>Neuer Tagebucheintrag</h2>
+
+      <input
+        id="journalTitle"
+        type="text"
+        placeholder="Titel">
+
+      <textarea
+        id="journalText"
+        placeholder="Was möchtest du dokumentieren?"></textarea>
+
+      <button onclick="addJournal()">
+        Eintrag speichern
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>Tagebuch</h2>
+      <div id="journalList"></div>
+    </div>
+
+  </section>
+
+
+  <section id="settings">
+
+    <div class="card">
+      <h2>Einstellungen</h2>
+
+      <p>
+        GrowLog speichert deine Pflanzen und Tagebucheinträge momentan lokal auf diesem Gerät.
+      </p>
+
+      <button class="secondary" onclick="setDemoClimate()">
+        Klima-Testwerte anzeigen
+      </button>
+
+      <br><br>
+
+      <button class="danger" onclick="clearData()">
+        Lokale Daten löschen
+      </button>
+    </div>
+
+  </section>
+
+</main>
+
+
+<nav>
+  <button class="active" onclick="showSection('dashboard', this)">
+    🏠<br>Dashboard
+  </button>
+
+  <button onclick="showSection('plants', this)">
+    🌿<br>Pflanzen
+  </button>
+
+  <button onclick="showSection('journal', this)">
+    📖<br>Tagebuch
+  </button>
+
+  <button onclick="showSection('settings', this)">
+    ⚙️<br>Einstellungen
+  </button>
+</nav>
+
+
+<script>
+  let plants = JSON.parse(localStorage.getItem("growlog_plants")) || [];
+  let journal = JSON.parse(localStorage.getItem("growlog_journal")) || [];
+
+  function saveData() {
+    localStorage.setItem("growlog_plants", JSON.stringify(plants));
+    localStorage.setItem("growlog_journal", JSON.stringify(journal));
+  }
+
+  function showSection(sectionId, button) {
+    document.querySelectorAll("section").forEach(section => {
+      section.classList.remove("active");
+    });
+
+    document.querySelectorAll("nav button").forEach(btn => {
+      btn.classList.remove("active");
+    });
+
+    document.getElementById(sectionId).classList.add("active");
+    button.classList.add("active");
+  }
+
+  function addPlant() {
+    const name = document.getElementById("plantName").value.trim();
+    const strain = document.getElementById("plantStrain").value.trim();
+    const phase = document.getElementById("plantPhase").value;
+    const start = document.getElementById("plantStart").value;
+
+    if (!name) {
+      alert("Bitte gib der Pflanze einen Namen.");
+      return;
+    }
+
+    plants.unshift({
+      id: Date.now(),
+      name,
+      strain,
+      phase,
+      start
+    });
+
+    saveData();
+
+    document.getElementById("plantName").value = "";
+    document.getElementById("plantStrain").value = "";
+    document.getElementById("plantStart").value = "";
+
+    renderPlants();
+  }
+
+  function deletePlant(id) {
+    plants = plants.filter(plant => plant.id !== id);
+    saveData();
+    renderPlants();
+  }
+
+  function renderPlants() {
+    const list = document.getElementById("plantList");
+    const count = document.getElementById("plantCount");
+
+    count.textContent = plants.length;
+
+    if (plants.length === 0) {
+      list.innerHTML = '<div class="empty">Noch keine Pflanzen angelegt.</div>';
+      return;
+    }
+
+    list.innerHTML = plants.map(plant => {
+      return `
+        <div class="plant">
+          <strong>${escapeHtml(plant.name)}</strong>
+
+          <div class="small">
+            ${plant.strain ? escapeHtml(plant.strain) + " · " : ""}
+            ${escapeHtml(plant.phase)}
+            ${plant.start ? " · Start: " + escapeHtml(plant.start) : ""}
+          </div>
+
+          <button
+            class="danger"
+            style="margin-top:10px;"
+            onclick="deletePlant(${plant.id})">
+            Löschen
+          </button>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function addJournal() {
+    const title = document.getElementById("journalTitle").value.trim();
+    const text = document.getElementById("journalText").value.trim();
+
+    if (!title && !text) {
+      alert("Bitte gib einen Titel oder einen Text ein.");
+      return;
+    }
+
+    journal.unshift({
+      id: Date.now(),
+      title: title || "Tagebucheintrag",
+      text,
+      date: new Date().toLocaleString("de-LU")
+    });
+
+    saveData();
+
+    document.getElementById("journalTitle").value = "";
+    document.getElementById("journalText").value = "";
+
+    renderJournal();
+  }
+
+  function renderJournal() {
+    const list = document.getElementById("journalList");
+    const last = document.getElementById("lastJournal");
+
+    if (journal.length === 0) {
+      list.innerHTML = '<div class="empty">Noch keine Tagebucheinträge.</div>';
+      last.innerHTML = "Noch kein Eintrag vorhanden.";
+      return;
+    }
+
+    list.innerHTML = journal.map(entry => {
+      return `
+        <div class="journal-entry">
+          <strong>${escapeHtml(entry.title)}</strong>
+          <div class="small">${escapeHtml(entry.date)}</div>
+          <p>${escapeHtml(entry.text)}</p>
+        </div>
+      `;
+    }).join("");
+
+    const newest = journal[0];
+
+    last.innerHTML = `
+      <strong>${escapeHtml(newest.title)}</strong>
+      <div class="small">${escapeHtml(newest.date)}</div>
+      <p>${escapeHtml(newest.text)}</p>
+    `;
+  }
+
+  function setDemoClimate() {
+    const temperature = 25.1;
+    const humidity = 58;
+
+    document.getElementById("temperature").textContent =
+      temperature.toFixed(1) + " °C";
+
+    document.getElementById("humidity").textContent =
+      humidity.toFixed(0) + " %";
+
+    document.getElementById("vpd").textContent =
+      calculateVPD(temperature, humidity).toFixed(2) + " kPa";
+  }
+
+  function calculateVPD(temperature, humidity) {
+    const saturation =
+      0.6108 * Math.exp((17.27 * temperature) / (temperature + 237.3));
+
+    return saturation * (1 - humidity / 100);
+  }
+
+  function clearData() {
+    const confirmed = confirm(
+      "Möchtest du wirklich alle lokal gespeicherten GrowLog-Daten löschen?"
+    );
+
+    if (!confirmed) return;
+
+    plants = [];
+    journal = [];
+
+    saveData();
+    renderPlants();
+    renderJournal();
+  }
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  renderPlants();
+  renderJournal();
+</script>
+
+</body>
+</html>
